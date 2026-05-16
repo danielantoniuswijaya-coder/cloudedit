@@ -1,0 +1,14 @@
+{
+  "name": "CloudEdit - Platform Jasa Editing Berbasis Cloud",
+  "description": "Premium cloud-based editing platform for high-end photos and videos. Professional workflow, secure asset management, and elite visual output.",
+  "requestFramePermissions": [
+    "camera",
+    "microphone"
+  ],
+  "majorCapabilities": [
+    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API",
+    "Cloud Storage Integration",
+    "Order Management",
+    "Admin Dashboard"
+  ]
+}

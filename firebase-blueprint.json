@@ -1,0 +1,65 @@
+{
+  "entities": {
+    "User": {
+      "title": "User Profile",
+      "description": "Stored user information including roles.",
+      "type": "object",
+      "properties": {
+        "userId": { "type": "string" },
+        "name": { "type": "string" },
+        "email": { "type": "string", "format": "email" },
+        "role": { "type": "string", "enum": ["user", "admin"] },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["userId", "name", "email", "role", "createdAt"]
+    },
+    "Service": {
+      "title": "Service Offering",
+      "description": "Types of editing services offered.",
+      "type": "object",
+      "properties": {
+        "serviceId": { "type": "string" },
+        "name": { "type": "string" },
+        "description": { "type": "string" },
+        "icon": { "type": "string" },
+        "basePrice": { "type": "number" }
+      },
+      "required": ["serviceId", "name", "basePrice"]
+    },
+    "Order": {
+      "title": "Order",
+      "description": "Customer order for editing services.",
+      "type": "object",
+      "properties": {
+        "orderId": { "type": "string" },
+        "userId": { "type": "string" },
+        "customerName": { "type": "string" },
+        "customerEmail": { "type": "string", "format": "email" },
+        "whatsapp": { "type": "string" },
+        "serviceName": { "type": "string" },
+        "packageName": { "type": "string" },
+        "notes": { "type": "string" },
+        "fileUrl": { "type": "string" },
+        "resultUrl": { "type": "string" },
+        "status": { "type": "string", "enum": ["pending", "processing", "completed"] },
+        "createdAt": { "type": "string", "format": "date-time" },
+        "updatedAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["orderId", "userId", "customerName", "customerEmail", "serviceName", "status", "createdAt"]
+    }
+  },
+  "firestore": {
+    "/users/{userId}": {
+      "schema": "User",
+      "description": "User profiles and roles."
+    },
+    "/services/{serviceId}": {
+      "schema": "Service",
+      "description": "Managed service listings."
+    },
+    "/orders/{orderId}": {
+      "schema": "Order",
+      "description": "Client orders."
+    }
+  }
+}
