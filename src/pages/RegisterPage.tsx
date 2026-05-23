@@ -1,9 +1,19 @@
 import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { auth, db } from "../lib/firebase";
-import { createUserWithEmailAndPassword } from "firebase/auth";
+import { auth, db, provider } from "../lib/firebase";
+import {
+  createUserWithEmailAndPassword,
+  signInWithPopup,
+} from "firebase/auth";
 import { doc, setDoc } from "firebase/firestore";
-import { Mail, Lock, User, Loader2, AlertCircle, ArrowLeft } from "lucide-react";
+import {
+  Mail,
+  Lock,
+  User,
+  Loader2,
+  AlertCircle,
+  ArrowLeft,
+} from "lucide-react";
 import { motion } from "framer-motion";
 
 export default function RegisterPage() {
@@ -12,18 +22,25 @@ export default function RegisterPage() {
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+
   const navigate = useNavigate();
 
+  // REGISTER EMAIL
   const handleRegister = async (e: React.FormEvent) => {
     e.preventDefault();
+
     setLoading(true);
     setError("");
 
     try {
-      const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+      const userCredential = await createUserWithEmailAndPassword(
+        auth,
+        email,
+        password
+      );
+
       const user = userCredential.user;
 
-      // Create user profile in Firestore
       await setDoc(doc(db, "users", user.uid), {
         userId: user.uid,
         name: name,
@@ -35,19 +52,43 @@ export default function RegisterPage() {
       navigate("/dashboard");
     } catch (err: any) {
       console.error(err);
+
       if (err.code === "auth/email-already-in-use") {
         setError("Email sudah digunakan.");
       } else {
-        setError("Terjadi kesalahan saat mendaftar. Silakan coba lagi.");
+        setError("Terjadi kesalahan saat mendaftar.");
       }
     } finally {
       setLoading(false);
     }
   };
 
+  // LOGIN GOOGLE
+  const handleGoogleLogin = async () => {
+    try {
+      const result = await signInWithPopup(auth, provider);
+
+      const user = result.user;
+
+      await setDoc(doc(db, "users", user.uid), {
+        userId: user.uid,
+        name: user.displayName,
+        email: user.email,
+        role: "user",
+        createdAt: new Date().toISOString(),
+      });
+
+      navigate("/dashboard");
+    } catch (error) {
+      console.error(error);
+      setError("Google login gagal.");
+    }
+  };
+
   return (
     <div className="min-h-screen flex items-center justify-center p-4 bg-bg relative overflow-hidden">
       <div className="absolute inset-0 bg-grid opacity-20 [mask-image:radial-gradient(ellipse_at_center,black_70%,transparent_100%)]"></div>
+
       <div className="absolute inset-0 z-0 pointer-events-none">
         <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-accent/10 blur-[120px] rounded-full"></div>
       </div>
@@ -57,15 +98,27 @@ export default function RegisterPage() {
         animate={{ opacity: 1, y: 0 }}
         className="max-w-md w-full relative z-10"
       >
-        <Link to="/" className="inline-flex items-center text-[10px] font-black uppercase tracking-[0.3em] text-text-s hover:text-white mb-10 transition-colors group">
-          <ArrowLeft size={14} className="mr-2 group-hover:-translate-x-1 transition-transform" /> Back to base
+        <Link
+          to="/"
+          className="inline-flex items-center text-[10px] font-black uppercase tracking-[0.3em] text-text-s hover:text-white mb-10 transition-colors group"
+        >
+          <ArrowLeft
+            size={14}
+            className="mr-2 group-hover:-translate-x-1 transition-transform"
+          />
+          Back to base
         </Link>
 
         <div className="glass p-8 md:p-12 rounded-[3.5rem] shadow-2xl relative overflow-hidden">
           <div className="relative z-10">
             <div className="text-center mb-12">
-              <h1 className="text-4xl font-black text-white mb-3 tracking-tighter">Initialize ID</h1>
-              <p className="text-text-s text-sm font-medium">Join the cloud visual elite</p>
+              <h1 className="text-4xl font-black text-white mb-3 tracking-tighter">
+                Initialize ID
+              </h1>
+
+              <p className="text-text-s text-sm font-medium">
+                Join the cloud visual elite
+              </p>
             </div>
 
             {error && (
@@ -81,9 +134,16 @@ export default function RegisterPage() {
 
             <form onSubmit={handleRegister} className="space-y-8">
               <div className="space-y-3">
-                <label className="text-[10px] font-black text-text-s uppercase tracking-[0.3em] ml-1">Identity Name</label>
+                <label className="text-[10px] font-black text-text-s uppercase tracking-[0.3em] ml-1">
+                  Identity Name
+                </label>
+
                 <div className="relative">
-                  <User className="absolute left-5 top-1/2 -translate-y-1/2 text-text-s" size={18} />
+                  <User
+                    className="absolute left-5 top-1/2 -translate-y-1/2 text-text-s"
+                    size={18}
+                  />
+
                   <input
                     type="text"
                     required
@@ -96,9 +156,16 @@ export default function RegisterPage() {
               </div>
 
               <div className="space-y-3">
-                <label className="text-[10px] font-black text-text-s uppercase tracking-[0.3em] ml-1">Email Terminal</label>
+                <label className="text-[10px] font-black text-text-s uppercase tracking-[0.3em] ml-1">
+                  Email Terminal
+                </label>
+
                 <div className="relative">
-                  <Mail className="absolute left-5 top-1/2 -translate-y-1/2 text-text-s" size={18} />
+                  <Mail
+                    className="absolute left-5 top-1/2 -translate-y-1/2 text-text-s"
+                    size={18}
+                  />
+
                   <input
                     type="email"
                     required
@@ -111,9 +178,16 @@ export default function RegisterPage() {
               </div>
 
               <div className="space-y-3">
-                <label className="text-[10px] font-black text-text-s uppercase tracking-[0.3em] ml-1">Secure Passkey</label>
+                <label className="text-[10px] font-black text-text-s uppercase tracking-[0.3em] ml-1">
+                  Secure Passkey
+                </label>
+
                 <div className="relative">
-                  <Lock className="absolute left-5 top-1/2 -translate-y-1/2 text-text-s" size={18} />
+                  <Lock
+                    className="absolute left-5 top-1/2 -translate-y-1/2 text-text-s"
+                    size={18}
+                  />
+
                   <input
                     type="password"
                     required
@@ -133,7 +207,8 @@ export default function RegisterPage() {
               >
                 {loading ? (
                   <>
-                    <Loader2 className="animate-spin mr-3" size={20} /> Provisioning...
+                    <Loader2 className="animate-spin mr-3" size={20} />
+                    Provisioning...
                   </>
                 ) : (
                   "Create Identity"
@@ -141,10 +216,21 @@ export default function RegisterPage() {
               </button>
             </form>
 
+            {/* GOOGLE LOGIN */}
+            <button
+              onClick={handleGoogleLogin}
+              className="w-full mt-6 border border-white/10 hover:border-white/20 bg-white/5 hover:bg-white/10 text-white font-bold py-5 rounded-2xl transition-all text-sm uppercase tracking-widest"
+            >
+              Sign in with Google
+            </button>
+
             <div className="mt-12 pt-8 border-t border-white/5 text-center">
               <p className="text-xs font-bold text-text-s uppercase tracking-widest">
                 Already registered?{" "}
-                <Link to="/login" className="text-accent hover:text-white transition-colors">
+                <Link
+                  to="/login"
+                  className="text-accent hover:text-white transition-colors"
+                >
                   Authorize Here
                 </Link>
               </p>
